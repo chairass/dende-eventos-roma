@@ -1,3 +1,4 @@
+
 enum class Modalidade{PRESENCIAL, REMOTO, HIBRIDO}
 enum class TipoUsuario{COMUM, ORGANIZADOR}
 enum class TipoEventos{SHOW, PALESTRA, CURSO, SOCIAL,CORPORATIVO,RELIGIOSO,ESPORTIVO, AULA, TREINAMENTO, SEMINARIO}
@@ -5,7 +6,7 @@ enum class Sexo{MASCULINO, FEMININO, OUTRO}
 
 data class Usuario(val nome:String,
                    val data:String,
-                   val sexo:String,
+                   val sexo:Sexo,
                    val email:String,
                    val senha:String,
                    val tipo:TipoUsuario,
@@ -57,9 +58,15 @@ fun main() {
 
         println("1 - Cadastrar usuário")
         println("2 - Cadastrar organizador")
-        println("3 - Cadastrar evento")
-        println("4 - Listar eventos")
-        println("5- Sair")
+        println("3 - Login")
+        println("4 - Visualizar perfil")
+        println("5 - Alterar perfil")
+        println("6 - Inativar conta")
+        println("7 - Reativar conta")
+        println("8 - Cadastrar evento")
+        println("9 - Comprar ingresso")
+        println("10 - Logout")
+        println("11 - Sair")
 
         opcao = readLine()!!.toInt()
 
@@ -68,12 +75,100 @@ fun main() {
                 println("=== Preencha as informações do usuário ===")
                 println("Nome:")
                 val nome = readLine()!!
-                println("Data de Nascimento:")
+
+
+                println("Data de Nascimento (dd/mm/yyyy):")
                 val dataNascimento = readLine()!!
-                println("Sexo:")
-                val sexo = readLine()!!
+                var dataValida = true
+
+                if (dataNascimento.length != 10){
+                    dataValida = false
+                }
+
+                if (dataNascimento[2] != '/' || dataNascimento[5] != '/'){
+                    dataValida = false
+                }
+
+                if (dataValida){
+                    val dia = dataNascimento.substring(0, 2).toIntOrNull()
+                    val mes = dataNascimento.substring(3, 5).toIntOrNull()
+                    val ano = dataNascimento.substring(6, 10).toIntOrNull()
+
+                    if (dia == null || mes == null || ano == null){
+                        dataValida = false
+                    } else {
+
+                        if (mes !in 1..12){
+                            dataValida = false
+                        }
+
+                        if (dia !in 1..31){
+                            dataValida = false
+                        }
+
+                        if (mes == 2 && dia > 29){
+                            dataValida = false
+                        }
+
+                        if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30){
+                            dataValida = false
+                        }
+                    }
+                }
+
+                if (!dataValida){
+                    println("Data inválida")
+                    return
+                }
+
+
+                println("Sexo (Masculino, Feminino, Outro):")
+                val sexoInput = readLine()!!.uppercase()
+                val sexo = try {
+                    Sexo.valueOf(sexoInput)
+                } catch (e: Exception) {
+                    println("Sexo inválido!")
+                    return
+                }
+
+
                 println("Email:")
                 val email = readLine()!!
+                var emailValido = true
+
+                if(email.contains(" ")){
+                    emailValido = false
+                }
+
+                if (email.count{it == '@'} != 1){
+                    emailValido = false
+                }
+
+                if(email.startsWith("@") || email.endsWith("@")){
+                    emailValido = false
+                }
+
+                if(emailValido){
+
+                    val posicaoArroba = email.indexOf('@')
+
+                    val parteDepoisDoArroba = email.substring(posicaoArroba + 1)
+
+                    if (!parteDepoisDoArroba.contains('.')){
+                        emailValido = false
+                    }
+
+                    if (email.endsWith(".")){
+                        emailValido = false
+                    }
+                }
+
+                if(!emailValido){
+                    println("Email inválido")
+                    return
+                }
+
+
                 println("Senha:")
                 val senha = readLine()!!
 
@@ -93,15 +188,107 @@ fun main() {
                 println("=== Preencha as informações do organizador ===")
                 println("Nome:")
                 val nome = readLine()!!
-                println("Data de Nascimento:")
+
+
+                println("Data de Nascimento (dd/mm/yyyy:")
                 val dataNascimento = readLine()!!
-                println("Sexo:")
-                val sexo = readLine()!!
+                var dataValida = true
+
+                if (dataNascimento.length != 10){
+                    dataValida = false
+                }
+
+                if (dataNascimento[2] != '/' || dataNascimento[5] != '/'){
+                    dataValida = false
+                }
+
+                if (dataValida){
+                    val dia = dataNascimento.substring(0, 2).toIntOrNull()
+                    val mes = dataNascimento.substring(3, 5).toIntOrNull()
+                    val ano = dataNascimento.substring(6, 10).toIntOrNull()
+
+                    if (dia == null || mes == null || ano == null){
+                        dataValida = false
+                    } else {
+
+                        if (mes !in 1..12){
+                            dataValida = false
+                        }
+
+                        if (dia !in 1..31){
+                            dataValida = false
+                        }
+
+                        if (mes == 2 && dia > 29){
+                            dataValida = false
+                        }
+
+                        if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30){
+                            dataValida = false
+                        }
+                    }
+                }
+
+                if (!dataValida){
+                    println("Data inválida")
+                    return
+                }
+
+
+                println("Sexo (Masculino, Feminino, Outro):")
+                val sexoInput = readLine()!!.uppercase()
+                val sexo = try {
+                    Sexo.valueOf(sexoInput)
+                } catch (e: Exception) {
+                    println("Sexo inválido!")
+                    return
+                }
+
+
                 println("Email:")
                 val email = readLine()!!
+                var emailValido = true
+
+                if(email.contains(" ")){
+                    emailValido = false
+                }
+
+                if (email.count{it == '@'} != 1){
+                    emailValido = false
+                }
+
+                if(email.startsWith("@") || email.endsWith("@")){
+                    emailValido = false
+                }
+
+                if(emailValido){
+
+                    val posicaoArroba = email.indexOf('@')
+
+                    val parteDepoisDoArroba = email.substring(posicaoArroba + 1)
+
+                    if (!parteDepoisDoArroba.contains('.')){
+                        emailValido = false
+                    }
+
+                    if (email.endsWith(".")){
+                        emailValido = false
+                    }
+                }
+
+                if(!emailValido){
+                    println("Email inválido")
+                    return
+                }
+
+
                 println("Senha:")
+
+
                 val senha = readLine()!!
                 println("Voce é uma empresa? Responda com SIM ou NAO")
+
+
                 val empresa = readLine()!!
 
                 val cnpj = null
@@ -130,10 +317,70 @@ fun main() {
             }
             3 -> {}
             4 -> {}
-            5 -> {break}
-        }
-    } while (opcao != 5)
+            5 -> {
+                println("Digite o email do usuário:")
+                val emailBusca = readLine()!!
 
-    println(usuarios)
+                val usuarioEncontrado = usuarios.find { it.email.equals(emailBusca, true) }
+
+
+                if (usuarioEncontrado == null) {
+                    println("Usuário não encontrado!")
+                    continue
+                }
+
+                println("=== Alterar dados ===")
+
+                var novoNome = usuarioEncontrado.nome
+                var novaData = usuarioEncontrado.data
+                var novoSexo = usuarioEncontrado.sexo
+
+                println("Nome atual: ${usuarioEncontrado.nome}")
+                println("Deseja trocar? (SIM ou NAO)")
+                if (readLine()!!.uppercase() == "SIM") {
+                    println("Novo nome:")
+                    novoNome = readLine()!!
+                }
+
+                println("Sexo atual: ${usuarioEncontrado.sexo}")
+                println("Deseja trocar? (SIM ou NAO)")
+                if (readLine()!!.uppercase() == "SIM") {
+                    println("Novo sexo (MASCULINO, FEMININO, OUTRO):")
+                    val sexoInput = readLine()!!.uppercase()
+
+                    val sexoConvertido = Sexo.values().find { it.name == sexoInput }
+
+                    if (sexoConvertido == null) {
+                        println("Sexo inválido")
+                        continue
+                    } else {
+                        novoSexo = sexoConvertido
+                    }
+
+                }
+
+                println("Nova senha:")
+                val novaSenha = readLine()!!
+
+                val usuarioAtualizado = usuarioEncontrado.copy(
+                    nome = novoNome,
+                    data = novaData,
+                    sexo = novoSexo,
+                    senha = novaSenha
+                )
+
+                usuarios.remove(usuarioEncontrado)
+                usuarios.add(usuarioAtualizado)
+
+                println("Usuário atualizado com sucesso!")
+            }
+            6 -> {}
+            7 -> {}
+            8 -> {}
+            9 -> {}
+            10 -> {}
+            11 -> {break}
+        }
+    } while (opcao != 11)
 }
 
