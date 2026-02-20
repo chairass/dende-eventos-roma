@@ -341,10 +341,11 @@ fun main() {
 
             3 -> {}//DEIVID
 
-            //LEONARDO
+            // Ver Perfil
             4 -> run {
                 val usuario = usuarioLogado
                 when (usuario){
+                    //Verifica se o usuario está logado
                     null -> println("Você precisa estar logado para ver o perfil.")
                     else -> {
                         println("\n === Meu Perfil ===")
@@ -353,17 +354,25 @@ fun main() {
                         println("Sexo: ${usuario.sexo}")
                         println("Tipo da Conta: ${usuario.tipo}")
 
+                        //Fatia a data, pegando a string "dd/mm/yyyy" e quebra em três pedaços usando "/" como separador
                         val partes = usuario.data.split("/")
+                        //getOrNull e toIntOrNull evita q o programa quebre se a data estiver mal formatada
                         val diaNasc = partes.getOrNull(0)?.toIntOrNull() ?: 1
                         val mesNasc = partes.getOrNull(1)?.toIntOrNull() ?: 1
                         val anoNasc = partes.getOrNull(2)?.toIntOrNull() ?: 2000
 
+                        //Cria um objeto de data real a partir dos números acima
                         val dataNascimento = LocalDate(anoNasc, mesNasc, diaNasc)
+
+                        //Pega a data de "hoje" lendo o relogio do sistema local
                         val hoje = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+                        //Calcula a diferença entre as datas
                         val periodo = dataNascimento.periodUntil(hoje)
 
                         println("Data de Nascimento: ${usuario.data} (${periodo.years} anos, ${periodo.months} meses, ${periodo.days} dias)")
 
+                        //Verifica o tipo do usuário. Se ele for comum, não faz nada
                         when (usuario.tipo) {
                             TipoUsuario.ORGANIZADOR -> {
                                 when (usuario.cnpj){
@@ -389,31 +398,37 @@ fun main() {
                     else -> {
                         println("\n=== Alterar dados ===")
 
+                        //Criar avriaveis temporárias que recebem os dados atuais
                         var novoNome = usuario.nome
                         var novoSexo = usuario.sexo
                         var novaSenha = usuario.senha
 
                         println("Nome atual: ${usuario.nome}")
                         println("Deseja trocar? (SIM ou NAO)")
+                        //Lê a resposta, converte para maiúsculo
                         when (readln()?.uppercase()){
                             "SIM" -> {
                                 println("Novo nome: ")
+                                //Se o usuário apertar Enter sem digitar nada, o '?: usuario.nome' mantém o nome atual
                                 novoNome = readln() ?: usuario.nome
                             }
                         }
 
                         println("Sexo Atual: ${usuario.sexo}")
                         println("Deseja trocar? (SIM ou NAO)")
+                        //Lê a resposta, converte para maiúsculo
                         when (readln()?.uppercase()){
                             "SIM" -> {
                                 println("Novo sexo (MASCULINO, FEMININO , OUTRO):")
                                 val sexoInput = readln()?.uppercase() ?: ""
+                                //Tenta converter a palavra digitada para o Enum sexo. O try/catch impede que feche o programa caso o usuario digite um valor n esperado
                                 val sexoConvertido = try {
                                     Sexo.valueOf(sexoInput)
                                 } catch (e: Exception){
-                                    null
+                                    null //se der erro, ele guarda null
                                 }
 
+                                //Só atualiza a variável temporário se a conversão der certo
                                 when (sexoConvertido) {
                                     null -> println("Sexo inválido. Mantendo o atual.")
                                     else -> novoSexo = sexoConvertido
@@ -422,19 +437,23 @@ fun main() {
                         }
 
                         println("Deseja trocas a senha? (SIM ou NAO)")
+                        //Lê a resposta, converte para maiúsculo
                         when (readln()?.uppercase()) {
                             "SIM" -> {
                                 println("Nova senha:")
+                                //Se o usuário apertar Enter sem digitar nada, o '?: usuario.nome' mantém o nome atual
                                 novaSenha = readln() ?: usuario.senha
                             }
                         }
 
+                        //Usamos o método .copy() para criar um clone exato do usuário logado, e sustitui APENAS os campo dentro do parênteses
                         val usuarioAtualizado = usuario.copy(
                             nome = novoNome,
                             sexo = novoSexo,
                             senha = novaSenha
                         )
 
+                        //Remove o antigo usuário da lista, adiciona o novo (atualizado) e diz q a sessão continua com ele
                         usuarios.remove(usuario)
                         usuarios.add(usuarioAtualizado)
                         usuarioLogado = usuarioAtualizado
@@ -446,15 +465,18 @@ fun main() {
             //LEONARDO
             6 -> run{
                 val usuario = usuarioLogado
+                //Checa o login e pede confirmação
                 when (usuario) {
                     null -> println("Você precisa estar logado para inativar a conta")
                     else -> {
                         println("\n=== Inativar Conta ===")
                         println("Tem certeza que deseja inativar sua conta? (SIM / NAO)")
 
+
                         when (readln()?.uppercase()){
                             "SIM" ->{
                                 when (usuario.tipo){
+                                    //Se for comum, ele inativa, remove o antigo, adiciona o novo e desloga
                                     TipoUsuario.COMUM -> {
                                         val inativado = usuario.copy(ativo = false)
                                         usuarios.remove(usuario)
@@ -463,12 +485,15 @@ fun main() {
                                         println("Conta inativada com sucesso!")
                                     }
                                     TipoUsuario.ORGANIZADOR -> {
+                                        // '.any { }' percorre a lista e eventos e retorna TRUE se achar PELO MENOS UM evento ativo
                                         val temEventoAtivo = eventos.any {
                                             it.emailOrganizador == usuario.email && it.ativo
                                         }
 
                                         when (temEventoAtivo) {
+                                            //Se retornar TRUE, bloqueia a inativação
                                             true -> println("ERRO: Você possui eventos ativos! Desative seus eventos antes de inativar a conta.")
+                                            //Se retornar FALSE, segue a mesma lógica de inatividade do usuário
                                             false -> {
                                                 val  inativado = usuario.copy(ativo = false)
                                                 usuarios.remove(usuario)
@@ -491,19 +516,23 @@ fun main() {
                 when (usuarioLogado) {
                     null -> {
                         println("\n=== Reativar Conta ===")
+                        //Pede as Credenciais
                         println("Email:")
                         val email = readln() ?: ""
                         println("Senha:")
                         val senha = readln() ?: ""
 
+                        //O '.find { }' e devolve o PRIMEIRO que atender à condição
                         val usuarioEncontrado = usuarios.find { it.email.equals(email, ignoreCase = true) && it.senha == senha }
 
                         when (usuarioEncontrado) {
                             null -> println("Credenciais incorretas ou usuário não encontrado.")
                             else -> {
+                                //Verifica o status da conta encontrada.
                                 when (usuarioEncontrado.ativo){
-                                    true -> println("Esta conta já está ativa!")
+                                    true -> println("Esta conta já está ativa!") //Impede de reativar quem não precisa
                                     false -> {
+                                        //Cria um clone com ativo = true e troca na lista de usuários
                                         val reativado = usuarioEncontrado.copy(ativo = true)
                                         usuarios.remove(usuarioEncontrado)
                                         usuarios.add(reativado)
