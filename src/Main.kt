@@ -90,6 +90,8 @@ fun main() {
         opcao = readLine()?.toIntOrNull() ?: 0
 
         when (opcao) {
+
+            //DEIVID
             1 -> {
                 println("=== Preencha as informações do usuário ===")
                 println("Nome:")
@@ -203,6 +205,7 @@ fun main() {
 
             }
 
+            //DEIVID
             2 -> {
                 println("=== Preencha as informações do organizador ===")
                 println("Nome:")
@@ -334,8 +337,12 @@ fun main() {
                 }
 
             }
+            //DEIVID
             3 -> {}
+
+            //LEONARDO
             4 -> {}
+            //LEONARDO
             5 -> {
                 println("Digite o email do usuário:")
                 val emailBusca = readLine()!!
@@ -393,12 +400,15 @@ fun main() {
 
                 println("Usuário atualizado com sucesso!")
             }
-            6 -> {}
-            7 -> {}
-            8 -> {}
-            9 -> {}
-            10 -> {}
-            11 -> {break}
+            6 -> {}//LEONARDO
+            7 -> {}//LEONARDO
+            8 -> {}//DYLAN
+            9 -> {}//CHAIRA
+            10 -> {}//DEIVID
+            11 -> {break}//DEIVID
+            12 -> {}//DYLAN
+            13 -> {}//CHAIRA
+            14 -> {}//CHAIRA
         }
     } while (opcao != 11)
 }
