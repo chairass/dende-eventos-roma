@@ -752,8 +752,98 @@ fun main() {
                     }
                 }
             }
-            13 -> {}//CHAIRA
-            14 -> {}//CHAIRA
+            13 -> run {
+                val usuario = usuarioLogado
+                if(usuario != null && usuario.tipo == TipoUsuario.COMUM){
+                    println("\n=== Feed de Eventos ===")
+
+                    val evetosDisponiveis = eventos.filter { evento ->
+                        val ingressosVendidos = ingressos.count { it.nomeEvento == evento.nome && !it.cancelado}
+                        evento.ativo && ingressosVendidos < evento.capacidadeMax
+                    }.sortedWith(compareBy(
+                        { it.dataInicio.split("/").let { partes -> "${partes.getOrNull(2)}${partes.getOrNull(1)}${partes.getOrNull(0)}" } },
+
+                        { it.nome }
+                    ))
+
+                    if (evetosDisponiveis.isEmpty()){
+                        println("Nenhum evento com vagas disponíveis no momento.")
+                    }else {
+                        evetosDisponiveis.forEachIndexed { index, evento ->
+                            val ingressoVendidos = ingressos.count { it.nomeEvento == evento.nome && !it.cancelado }
+                            val vagas = evento.capacidadeMax - ingressoVendidos
+                            println("${index + 1} - ${evento.nome} | Data: ${evento.dataInicio} | Preço: R$ ${evento.preco} | Vagas: $vagas")
+                        }
+                    }
+                }else {
+                    println("Acesso negado. Apenas usuários comuns podem acessar o feed.")
+                }
+            }
+            14 -> run {
+                val usuario = usuarioLogado
+                if (usuario != null && usuario.tipo == TipoUsuario.COMUM){
+                    println("\n=== Meus Ingressos ===")
+                    val meusIngresso = ingressos.filter { it.emailUsuario == usuario.email }
+
+                    if (meusIngresso.isEmpty()){
+                        println("Você ainda não comprou ingressos.")
+                    }else{
+                        val ingressoOrdenados = meusIngresso.sortedWith(compareBy(
+                            { ingresso ->
+                                val evento = eventos.find { it.nome == ingresso.nomeEvento }
+                                val inativoOuCancelado = ingresso.cancelado || (evento?.ativo != true)
+                                if (inativoOuCancelado) 1 else 0
+                            },
+
+                            { ingresso ->
+                                val evento = eventos.find { it.nome == ingresso.nomeEvento }
+                                evento?.dataInicio?.split("/")?.let { partes -> "${partes.getOrNull(2)}${partes.getOrNull(1)}${partes.getOrNull(0)}" } ?: "99999999"
+                            },
+                            { it.nomeEvento }
+                        ))
+
+                        ingressoOrdenados.forEachIndexed { index, ingresso ->
+                            val evento = eventos.find { it.nome == ingresso.nomeEvento }
+                            val status = if (ingresso.cancelado) "CANCELADO" else if (evento?.ativo == true) "ATIVO" else "FINALIZADO"
+                            println("${index + 1} - [${status}] Evento: ${ingresso.nomeEvento} | Valor Pago: R$ ${ingresso.valorPago}")
+                        }
+
+                        println("\nDeseja cancelar algum ingresso? (SIM / NAO)")
+                        if (readln()?.uppercase() == "SIM") {
+                            print("Digite o número do ingresso que deseja cancelar: ")
+                            val escolha = readln()?.toIntOrNull()
+
+                            if (escolha != null && escolha in 1.. ingressoOrdenados.size){
+                                val ingressoAlvo = ingressoOrdenados[escolha - 1]
+
+                                if (ingressoAlvo.cancelado){
+                                    println("Este ingresso já está cancelado.")
+                                }else{
+                                    val evento = eventos.find { it.nome == ingressoAlvo.nomeEvento }
+
+                                    if (evento != null && evento.temEstorno) {
+                                        val desconto = ingressoAlvo.valorPago * (evento.taxaEstorno / 100)
+                                        val valorEstorno = ingressoAlvo.valorPago - desconto
+                                        println("Ingresso cancelado com sucesso!")
+                                        println("Valor a ser estornado: R$ $valorEstorno (Taxa retida: R$ $desconto")
+                                    }else{
+                                        println("Ingresso cancelado com sucesso")
+                                        println("Esse evento não possui política de estorne. Nenhum valor será devolvido.")
+                                    }
+
+                                    val ingressoCancelado = ingressoAlvo.copy(cancelado = true)
+                                    ingressos.remove(ingressoAlvo)
+                                    ingressos.add(ingressoCancelado)
+                                }
+                            }else{
+                                println("Opção inválida.")
+                            }
+                        }
+                    }
+                }else{
+                    println("Acesso negado. Apenas usuários comuns possuem ingressos")
+                }
+            }//CHAIRA
         }
     } while (opcao != 11)
 }
