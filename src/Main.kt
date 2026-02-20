@@ -1,3 +1,4 @@
+import kotlinx.datetime.*
 
 enum class Modalidade{PRESENCIAL, REMOTO, HIBRIDO}
 enum class TipoUsuario{COMUM, ORGANIZADOR}
@@ -65,7 +66,7 @@ fun main() {
             else -> {
                 println("Olá ${usuarioLogado.nome}! (Perfil: ${usuarioLogado.tipo}")
                 println("4 - Ver Perfil ")
-                println("5 - Alteral Perfil")
+                println("5 - Alterar Perfil")
                 println("6 - Inativar Conta")
 
                 when (usuarioLogado.tipo) {
@@ -76,7 +77,7 @@ fun main() {
                     TipoUsuario.COMUM -> {
                         println("9 - Comprar Ingresso")
                         println("13 - Feed de Eventos")
-                        println("14 - Meus Ingresso")
+                        println("14 - Meus Ingressos")
                     }
                 }
 
@@ -337,70 +338,214 @@ fun main() {
                 }
 
             }
-            //DEIVID
-            3 -> {}
-            //LEONARDO
-            4 -> {}
+
+            3 -> {}//DEIVID
+
+            // Ver Perfil
+            4 -> run {
+                val usuario = usuarioLogado
+                when (usuario){
+                    //Verifica se o usuario está logado
+                    null -> println("Você precisa estar logado para ver o perfil.")
+                    else -> {
+                        println("\n === Meu Perfil ===")
+                        println("Nome: ${usuario.nome}")
+                        println("Email: ${usuario.email}")
+                        println("Sexo: ${usuario.sexo}")
+                        println("Tipo da Conta: ${usuario.tipo}")
+
+                        //Fatia a data, pegando a string "dd/mm/yyyy" e quebra em três pedaços usando "/" como separador
+                        val partes = usuario.data.split("/")
+                        //getOrNull e toIntOrNull evita q o programa quebre se a data estiver mal formatada
+                        val diaNasc = partes.getOrNull(0)?.toIntOrNull() ?: 1
+                        val mesNasc = partes.getOrNull(1)?.toIntOrNull() ?: 1
+                        val anoNasc = partes.getOrNull(2)?.toIntOrNull() ?: 2000
+
+                        //Cria um objeto de data real a partir dos números acima
+                        val dataNascimento = LocalDate(anoNasc, mesNasc, diaNasc)
+
+                        //Pega a data de "hoje" lendo o relogio do sistema local
+                        val hoje = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+                        //Calcula a diferença entre as datas
+                        val periodo = dataNascimento.periodUntil(hoje)
+
+                        println("Data de Nascimento: ${usuario.data} (${periodo.years} anos, ${periodo.months} meses, ${periodo.days} dias)")
+
+                        //Verifica o tipo do usuário. Se ele for comum, não faz nada
+                        when (usuario.tipo) {
+                            TipoUsuario.ORGANIZADOR -> {
+                                when (usuario.cnpj){
+                                    null -> println("Atuando como pessoa Física.")
+                                    else -> {
+                                        println("CNPJ: ${usuario.cnpj}")
+                                        println("Razão Social ${usuario.razaoSocial} ")
+                                        println("Nome Fantasia: ${usuario.nomeFantasia}")
+                                    }
+                                }
+                            }
+                            TipoUsuario.COMUM -> {}
+                        }
+                    }
+                }
+            }
+
             //LEONARDO
             5 -> {
-                println("Digite o email do usuário:")
-                val emailBusca = readLine()!!
+                val usuario = usuarioLogado
+                when (usuario) {
+                    null -> println("Você precisa estar logado para alterar o perfil.")
+                    else -> {
+                        println("\n=== Alterar dados ===")
 
-                val usuarioEncontrado = usuarios.find { it.email.equals(emailBusca, true) }
+                        //Criar avriaveis temporárias que recebem os dados atuais
+                        var novoNome = usuario.nome
+                        var novoSexo = usuario.sexo
+                        var novaSenha = usuario.senha
 
+                        println("Nome atual: ${usuario.nome}")
+                        println("Deseja trocar? (SIM ou NAO)")
+                        //Lê a resposta, converte para maiúsculo
+                        when (readln()?.uppercase()){
+                            "SIM" -> {
+                                println("Novo nome: ")
+                                //Se o usuário apertar Enter sem digitar nada, o '?: usuario.nome' mantém o nome atual
+                                novoNome = readln() ?: usuario.nome
+                            }
+                        }
 
-                if (usuarioEncontrado == null) {
-                    println("Usuário não encontrado!")
-                    continue
-                }
+                        println("Sexo Atual: ${usuario.sexo}")
+                        println("Deseja trocar? (SIM ou NAO)")
+                        //Lê a resposta, converte para maiúsculo
+                        when (readln()?.uppercase()){
+                            "SIM" -> {
+                                println("Novo sexo (MASCULINO, FEMININO , OUTRO):")
+                                val sexoInput = readln()?.uppercase() ?: ""
+                                //Tenta converter a palavra digitada para o Enum sexo. O try/catch impede que feche o programa caso o usuario digite um valor n esperado
+                                val sexoConvertido = try {
+                                    Sexo.valueOf(sexoInput)
+                                } catch (e: Exception){
+                                    null //se der erro, ele guarda null
+                                }
 
-                println("=== Alterar dados ===")
+                                //Só atualiza a variável temporário se a conversão der certo
+                                when (sexoConvertido) {
+                                    null -> println("Sexo inválido. Mantendo o atual.")
+                                    else -> novoSexo = sexoConvertido
+                                }
+                            }
+                        }
 
-                var novoNome = usuarioEncontrado.nome
-                var novaData = usuarioEncontrado.data
-                var novoSexo = usuarioEncontrado.sexo
+                        println("Deseja trocas a senha? (SIM ou NAO)")
+                        //Lê a resposta, converte para maiúsculo
+                        when (readln()?.uppercase()) {
+                            "SIM" -> {
+                                println("Nova senha:")
+                                //Se o usuário apertar Enter sem digitar nada, o '?: usuario.nome' mantém o nome atual
+                                novaSenha = readln() ?: usuario.senha
+                            }
+                        }
 
-                println("Nome atual: ${usuarioEncontrado.nome}")
-                println("Deseja trocar? (SIM ou NAO)")
-                if (readLine()!!.uppercase() == "SIM") {
-                    println("Novo nome:")
-                    novoNome = readLine()!!
-                }
+                        //Usamos o método .copy() para criar um clone exato do usuário logado, e sustitui APENAS os campo dentro do parênteses
+                        val usuarioAtualizado = usuario.copy(
+                            nome = novoNome,
+                            sexo = novoSexo,
+                            senha = novaSenha
+                        )
 
-                println("Sexo atual: ${usuarioEncontrado.sexo}")
-                println("Deseja trocar? (SIM ou NAO)")
-                if (readLine()!!.uppercase() == "SIM") {
-                    println("Novo sexo (MASCULINO, FEMININO, OUTRO):")
-                    val sexoInput = readLine()!!.uppercase()
+                        //Remove o antigo usuário da lista, adiciona o novo (atualizado) e diz q a sessão continua com ele
+                        usuarios.remove(usuario)
+                        usuarios.add(usuarioAtualizado)
+                        usuarioLogado = usuarioAtualizado
 
-                    val sexoConvertido = Sexo.values().find { it.name == sexoInput }
-
-                    if (sexoConvertido == null) {
-                        println("Sexo inválido")
-                        continue
-                    } else {
-                        novoSexo = sexoConvertido
+                        println("Perfil atualizado com sucesso!")
                     }
-
                 }
-
-                println("Nova senha:")
-                val novaSenha = readLine()!!
-
-                val usuarioAtualizado = usuarioEncontrado.copy(
-                    nome = novoNome,
-                    data = novaData,
-                    sexo = novoSexo,
-                    senha = novaSenha
-                )
-
-                usuarios.remove(usuarioEncontrado)
-                usuarios.add(usuarioAtualizado)
-
-                println("Usuário atualizado com sucesso!")
             }
-            6 -> {}//LEONARDO
-            7 -> {}//LEONARDO
+            //LEONARDO
+            6 -> run{
+                val usuario = usuarioLogado
+                //Checa o login e pede confirmação
+                when (usuario) {
+                    null -> println("Você precisa estar logado para inativar a conta")
+                    else -> {
+                        println("\n=== Inativar Conta ===")
+                        println("Tem certeza que deseja inativar sua conta? (SIM / NAO)")
+
+
+                        when (readln()?.uppercase()){
+                            "SIM" ->{
+                                when (usuario.tipo){
+                                    //Se for comum, ele inativa, remove o antigo, adiciona o novo e desloga
+                                    TipoUsuario.COMUM -> {
+                                        val inativado = usuario.copy(ativo = false)
+                                        usuarios.remove(usuario)
+                                        usuarios.add(inativado)
+                                        usuarioLogado = null
+                                        println("Conta inativada com sucesso!")
+                                    }
+                                    TipoUsuario.ORGANIZADOR -> {
+                                        // '.any { }' percorre a lista e eventos e retorna TRUE se achar PELO MENOS UM evento ativo
+                                        val temEventoAtivo = eventos.any {
+                                            it.emailOrganizador == usuario.email && it.ativo
+                                        }
+
+                                        when (temEventoAtivo) {
+                                            //Se retornar TRUE, bloqueia a inativação
+                                            true -> println("ERRO: Você possui eventos ativos! Desative seus eventos antes de inativar a conta.")
+                                            //Se retornar FALSE, segue a mesma lógica de inatividade do usuário
+                                            false -> {
+                                                val  inativado = usuario.copy(ativo = false)
+                                                usuarios.remove(usuario)
+                                                usuarios.add(inativado)
+                                                usuarioLogado = null
+                                                println("Conta de organizador inativada com sucesso.")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            else -> println("Operação cancelada.")
+                        }
+                    }
+                }
+            }
+
+            //LEONARDO
+            7 -> run {
+                when (usuarioLogado) {
+                    null -> {
+                        println("\n=== Reativar Conta ===")
+                        //Pede as Credenciais
+                        println("Email:")
+                        val email = readln() ?: ""
+                        println("Senha:")
+                        val senha = readln() ?: ""
+
+                        //O '.find { }' e devolve o PRIMEIRO que atender à condição
+                        val usuarioEncontrado = usuarios.find { it.email.equals(email, ignoreCase = true) && it.senha == senha }
+
+                        when (usuarioEncontrado) {
+                            null -> println("Credenciais incorretas ou usuário não encontrado.")
+                            else -> {
+                                //Verifica o status da conta encontrada.
+                                when (usuarioEncontrado.ativo){
+                                    true -> println("Esta conta já está ativa!") //Impede de reativar quem não precisa
+                                    false -> {
+                                        //Cria um clone com ativo = true e troca na lista de usuários
+                                        val reativado = usuarioEncontrado.copy(ativo = true)
+                                        usuarios.remove(usuarioEncontrado)
+                                        usuarios.add(reativado)
+                                        println("Conta reativada com sucesso! Volte ao menu para fazer Login.")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else -> println("Você já está logado. Saia primeiro para reativar uma conta inativa.")
+                }
+            }
+           
             8 -> {
                 if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
                     println("\n=== Cadastrar Novo Evento ===")
