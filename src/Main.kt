@@ -64,7 +64,7 @@ fun main() {
                 println("11 - Sair")
             }
             else -> {
-                println("Olá ${usuarioLogado.nome}! (Perfil: ${usuarioLogado.tipo}")
+                println("Olá ${usuarioLogado.nome}! (Perfil: ${usuarioLogado.tipo})")
                 println("4 - Ver Perfil ")
                 println("5 - Alterar Perfil")
                 println("6 - Inativar Conta")
@@ -103,44 +103,44 @@ fun main() {
                 val dataNascimento = readLine()!!
                 var dataValida = true
 
-                if (dataNascimento.length != 10){
+                if (dataNascimento.length != 10) {
                     dataValida = false
                 }
 
-                if (dataNascimento[2] != '/' || dataNascimento[5] != '/'){
+                if (dataNascimento[2] != '/' || dataNascimento[5] != '/') {
                     dataValida = false
                 }
 
-                if (dataValida){
+                if (dataValida) {
                     val dia = dataNascimento.substring(0, 2).toIntOrNull()
                     val mes = dataNascimento.substring(3, 5).toIntOrNull()
                     val ano = dataNascimento.substring(6, 10).toIntOrNull()
 
-                    if (dia == null || mes == null || ano == null){
+                    if (dia == null || mes == null || ano == null) {
                         dataValida = false
                     } else {
 
-                        if (mes !in 1..12){
+                        if (mes !in 1..12) {
                             dataValida = false
                         }
 
-                        if (dia !in 1..31){
+                        if (dia !in 1..31) {
                             dataValida = false
                         }
 
-                        if (mes == 2 && dia > 29){
+                        if (mes == 2 && dia > 29) {
                             dataValida = false
                         }
 
-                        if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30){
+                        if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) {
                             dataValida = false
                         }
                     }
                 }
 
-                if (!dataValida){
+                if (!dataValida) {
                     println("Data inválida")
-                    return
+                    continue
                 }
 
 
@@ -150,7 +150,7 @@ fun main() {
                     Sexo.valueOf(sexoInput)
                 } catch (e: Exception) {
                     println("Sexo inválido!")
-                    return
+                    continue
                 }
 
 
@@ -158,52 +158,56 @@ fun main() {
                 val email = readLine()!!
                 var emailValido = true
 
-                if(email.contains(" ")){
-                    emailValido = false
+                when {
+                    email.contains(" ") -> emailValido = false
+                    email.count { it == '@' } != 1 -> emailValido = false
+                    email.startsWith("@") || email.endsWith("@") -> emailValido = false
                 }
 
-                if (email.count{it == '@'} != 1){
-                    emailValido = false
-                }
-
-                if(email.startsWith("@") || email.endsWith("@")){
-                    emailValido = false
-                }
-
-                if(emailValido){
+                if (emailValido) {
 
                     val posicaoArroba = email.indexOf('@')
 
                     val parteDepoisDoArroba = email.substring(posicaoArroba + 1)
 
-                    if (!parteDepoisDoArroba.contains('.')){
-                        emailValido = false
-                    }
-
-                    if (email.endsWith(".")){
-                        emailValido = false
+                    when {
+                        !parteDepoisDoArroba.contains('.') -> emailValido = false
+                        email.endsWith(".") -> emailValido = false
                     }
                 }
 
-                if(!emailValido){
+                if (!emailValido) {
                     println("Email inválido")
-                    return
+                    continue
                 }
 
 
                 println("Senha:")
                 val senha = readLine()!!
 
-                val emailExistente = usuarios.any { it.email.equals(email, true)}
+                val emailExistente = usuarios.any { it.email.equals(email, true) }
 
-                if (emailExistente) {
-                    println("Email já utilizado, tente outro!")
-                } else {
-                    val usuario = Usuario(nome = nome, data = dataNascimento , sexo = sexo, email = email, senha = senha, tipo = TipoUsuario.COMUM, ativo = true, cnpj = null, razaoSocial = null, nomeFantasia = null)
-                    usuarios.add(usuario)
-                    println("Usuário cadastrado com sucesso!")
+                when (emailExistente) {
+
+                    true -> println("Email já utilizado, tente outro!")
+
+                    false -> {
+                        val usuario = Usuario(
+                            nome = nome,
+                            data = dataNascimento,
+                            sexo = sexo,
+                            email = email,
+                            senha = senha,
+                            tipo = TipoUsuario.COMUM,
+                            ativo = true,
+                            cnpj = null,
+                            razaoSocial = null,
+                            nomeFantasia = null
+                        )
+                        usuarios.add(usuario)
+                        println("Usuário cadastrado com sucesso!")
+                    }
                 }
-
             }
 
             //DEIVID
@@ -213,7 +217,7 @@ fun main() {
                 val nome = readLine()!!
 
 
-                println("Data de Nascimento (dd/mm/yyyy:")
+                println("Data de Nascimento (dd/mm/yyyy:)")
                 val dataNascimento = readLine()!!
                 var dataValida = true
 
@@ -254,7 +258,7 @@ fun main() {
 
                 if (!dataValida){
                     println("Data inválida")
-                    return
+                    continue
                 }
 
 
@@ -264,7 +268,7 @@ fun main() {
                     Sexo.valueOf(sexoInput)
                 } catch (e: Exception) {
                     println("Sexo inválido!")
-                    return
+                    continue
                 }
 
 
@@ -272,16 +276,10 @@ fun main() {
                 val email = readLine()!!
                 var emailValido = true
 
-                if(email.contains(" ")){
-                    emailValido = false
-                }
-
-                if (email.count{it == '@'} != 1){
-                    emailValido = false
-                }
-
-                if(email.startsWith("@") || email.endsWith("@")){
-                    emailValido = false
+                when {
+                    email.contains(" ") -> emailValido = false
+                    email.count { it == '@'} != 1 -> emailValido = false
+                    email.startsWith("@") || email.endsWith("@") -> emailValido = false
                 }
 
                 if(emailValido){
@@ -290,18 +288,15 @@ fun main() {
 
                     val parteDepoisDoArroba = email.substring(posicaoArroba + 1)
 
-                    if (!parteDepoisDoArroba.contains('.')){
-                        emailValido = false
-                    }
-
-                    if (email.endsWith(".")){
-                        emailValido = false
+                    when {
+                        !parteDepoisDoArroba.contains('.') -> emailValido = false
+                        email.endsWith(".") -> emailValido = false
                     }
                 }
 
                 if(!emailValido){
                     println("Email inválido")
-                    return
+                    continue
                 }
 
 
@@ -314,32 +309,68 @@ fun main() {
 
                 val empresa = readLine()!!
 
-                val cnpj = null
-                val razaoSocial = null
-                val nomeFantasia = null
+                var cnpj: String? = null
+                var razaoSocial: String? = null
+                var nomeFantasia: String? = null
 
-                if (empresa.equals("SIM")){
-                    println("CNPJ:")
-                    val cnpj = readLine()!!
-                    println("Razao Social")
-                    val razaoSocial = readLine()!!
-                    println("Nome fantasia:")
-                    val nomeFantasia = readLine()!!
+                when(empresa.uppercase()) {
+                    "SIM" -> {
+                        println("CNPJ:")
+                        cnpj = readLine()!!
+                        println("Razao Social")
+                        razaoSocial = readLine()!!
+                        println("Nome fantasia:")
+                        nomeFantasia = readLine()!!
+                    }
                 }
 
                 val emailExistente = usuarios.any { it.email.equals(email, true)}
 
-                if (emailExistente) {
-                    println("Email já utilizado, tente outro!")
-                } else {
-                    val usuario = Usuario(nome = nome, data = dataNascimento , sexo = sexo, email = email, senha = senha, tipo = TipoUsuario.ORGANIZADOR, ativo = true, cnpj = cnpj, razaoSocial = razaoSocial, nomeFantasia = nomeFantasia)
+                when (emailExistente) {
+                    true -> println("Email já utilizado, tente outro!")
+
+                    false -> {
+                        val usuario = Usuario(
+                            nome = nome,
+                            data = dataNascimento,
+                            sexo = sexo,
+                            email = email,
+                            senha = senha,
+                            tipo = TipoUsuario.ORGANIZADOR,
+                            ativo = true,
+                            cnpj = cnpj,
+                            razaoSocial = razaoSocial,
+                            nomeFantasia = nomeFantasia
+                        )
+
                     usuarios.add(usuario)
                     println("Usuário cadastrado com sucesso!")
+                    }
                 }
 
             }
 
-            3 -> {}//DEIVID
+            3 -> {
+                if (usuarioLogado != null){
+                    println("Já existe um usuário logado.")
+                    continue
+                }
+
+                print("Email:")
+                val email = readln()!!
+
+                print("Senha:")
+                val senha = readLine()!!
+
+                val usuario = usuarios.find { it.email.equals(email, true) && it.senha == senha && it.ativo}
+
+                if (usuario == null) {
+                    println("Credenciais incorretas ou conta inativa")
+                } else {
+                    usuarioLogado = usuario
+                    println("Login realizado com sucesso!")
+                }
+            }//DEIVID
 
             // Ver Perfil
             4 -> run {
@@ -545,7 +576,7 @@ fun main() {
                     else -> println("Você já está logado. Saia primeiro para reativar uma conta inativa.")
                 }
             }
-           
+
             8 -> {
                 if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
                     println("\n=== Cadastrar Novo Evento ===")
@@ -603,8 +634,67 @@ fun main() {
                     println("❌ Acesso negado. Apenas organizadores podem cadastrar eventos.")
                 }
             }  //Dylan
-            9 -> {}//CHAIRA
-            10 -> {}//DEIVID
+            9 -> {
+                if(usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.COMUM) {
+
+                    println("\n=== Eventos Disponíveis ===")
+
+                    val eventosDisponiveis = eventos.filter { it.ativo }
+
+                    if (eventosDisponiveis.isEmpty()){
+                        println("Nenhum evento disponível no momento.")
+                    } else {
+
+                        eventosDisponiveis.forEachIndexed { index, evento ->
+                            println("${index + 1} - ${evento.nome} | ${evento.dataInicio} | R$ ${evento.preco}")
+                        }
+
+                        println("Digite o número do evento:")
+                        val escolha = readLine()?.toIntOrNull()
+
+                        if (escolha == null || escolha !in 1..eventosDisponiveis.size) {
+                            println("Evento inválido")
+                            continue
+                        }
+
+                        val eventoEscolhido = eventosDisponiveis[escolha - 1]
+
+                        val ingressosVendidos = ingressos.count {
+                            it.nomeEvento == eventoEscolhido.nome && !it.cancelado
+                        }
+
+                        if (ingressosVendidos >= eventoEscolhido.capacidadeMax) {
+                            println("Evento esgotado")
+                            continue
+                        }
+
+                        val jaComprou = ingressos.any {
+                            it.emailUsuario == usuarioLogado.email && it.nomeEvento == eventoEscolhido.nome && !it.cancelado
+                        }
+
+                        if (jaComprou) {
+                            println("Voce já comprou ingresso para esse evento")
+                            continue
+                        }
+
+                        val ingresso = Ingresso(
+                            emailUsuario = usuarioLogado.email,
+                            nomeEvento = eventoEscolhido.nome,
+                            valorPago = eventoEscolhido.preco
+                        )
+
+                        ingressos.add(ingresso)
+
+                        println("Ingresso comprado com sucesso!")
+                    }
+                } else {
+                    println("Apenas usuários comuns podem comprar ingressos!")
+                }
+            }//CHAIRA
+            10 -> {
+                usuarioLogado = null
+                println("Logout realizado com sucesso!")
+            }//DEIVID
             11 -> {break}//DEIVID
             12 -> {
                 if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
