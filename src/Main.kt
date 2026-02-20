@@ -577,8 +577,9 @@ fun main() {
                 }
             }
 
-            8 -> {
-                if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
+            8 -> run {
+                val usuario = usuarioLogado
+                if (usuario != null && usuario.tipo == TipoUsuario.ORGANIZADOR) {
                     println("\n=== Cadastrar Novo Evento ===")
                     print("Nome do evento: ")
                     val nome = readlnOrNull() ?: ""
@@ -625,7 +626,7 @@ fun main() {
                         nome = nome, descricao = descricao, pagina = pagina, dataInicio = dataInicio,
                         dataFim = dataFim, tipo = tipo, ligadoPrincipal = null, modalidade = modalidade,
                         capacidadeMax = capacidadeMax, local = local, ativo = true, preco = preco,
-                        temEstorno = temEstorno, taxaEstorno = taxaEstorno, emailOrganizador = usuarioLogado.email
+                        temEstorno = temEstorno, taxaEstorno = taxaEstorno, emailOrganizador = usuario.email
                     )
 
                     eventos.add(novoEvento)
@@ -634,8 +635,9 @@ fun main() {
                     println("❌ Acesso negado. Apenas organizadores podem cadastrar eventos.")
                 }
             }  //Dylan
-            9 -> {
-                if(usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.COMUM) {
+            9 -> run {
+                val usuario = usuarioLogado
+                if(usuario != null && usuario.tipo == TipoUsuario.COMUM) {
 
                     println("\n=== Eventos Disponíveis ===")
 
@@ -654,7 +656,7 @@ fun main() {
 
                         if (escolha == null || escolha !in 1..eventosDisponiveis.size) {
                             println("Evento inválido")
-                            continue
+                            return@run
                         }
 
                         val eventoEscolhido = eventosDisponiveis[escolha - 1]
@@ -665,20 +667,20 @@ fun main() {
 
                         if (ingressosVendidos >= eventoEscolhido.capacidadeMax) {
                             println("Evento esgotado")
-                            continue
+                            return@run
                         }
 
                         val jaComprou = ingressos.any {
-                            it.emailUsuario == usuarioLogado.email && it.nomeEvento == eventoEscolhido.nome && !it.cancelado
+                            it.emailUsuario == usuario.email && it.nomeEvento == eventoEscolhido.nome && !it.cancelado
                         }
 
                         if (jaComprou) {
                             println("Voce já comprou ingresso para esse evento")
-                            continue
+                            return@run
                         }
 
                         val ingresso = Ingresso(
-                            emailUsuario = usuarioLogado.email,
+                            emailUsuario = usuario.email,
                             nomeEvento = eventoEscolhido.nome,
                             valorPago = eventoEscolhido.preco
                         )
@@ -697,9 +699,10 @@ fun main() {
             }//DEIVID
             11 -> {break}//DEIVID
             12 -> {
-                if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
+                val usuario = usuarioLogado
+                if (usuario != null && usuario.tipo == TipoUsuario.ORGANIZADOR) {
                     println("\n=== Meus Eventos ===")
-                    val meusEventos = eventos.filter { it.emailOrganizador == usuarioLogado.email }
+                    val meusEventos = eventos.filter { it.emailOrganizador == usuario.email }
 
                     if (meusEventos.isEmpty()) {
                         println("Você ainda não possui eventos cadastrados.")
