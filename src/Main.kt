@@ -752,23 +752,35 @@ fun main() {
                     }
                 }
             }
+            // CHAIRA (DEV 3) - Feed de Eventos
             13 -> run {
                 val usuario = usuarioLogado
+                // Verifica se o usuário está logado e se o perfil é do tipo COMUM (Clientes)
                 if(usuario != null && usuario.tipo == TipoUsuario.COMUM){
                     println("\n=== Feed de Eventos ===")
 
+                    // 1. FILTRAGEM DE EVENTOS (Regra de Negócio do Barema)
                     val evetosDisponiveis = eventos.filter { evento ->
+                        // Conta quantos ingressos já foram vendidos para este evento específico (excluindo os cancelados)
                         val ingressosVendidos = ingressos.count { it.nomeEvento == evento.nome && !it.cancelado}
+                        // O evento só passa no filtro se estiver ATIVO e se ainda tiver VAGAS disponíveis
                         evento.ativo && ingressosVendidos < evento.capacidadeMax
                     }.sortedWith(compareBy(
+                        // 2. ORDENAÇÃO POR DATA
+                        // Pega a string "dd/mm/yyyy", corta nas barras e reorganiza para "yyyymmdd" (Ex: 20260220).
+                        // Isso é um truque para o Kotlin conseguir colocar as datas na ordem cronológica correta!
                         { it.dataInicio.split("/").let { partes -> "${partes.getOrNull(2)}${partes.getOrNull(1)}${partes.getOrNull(0)}" } },
 
+                        // 3. ORDENAÇÃO ALFABÉTICA
+                        // Se as datas forem iguais, ele desempata colocando em ordem alfabética pelo nome do evento
                         { it.nome }
                     ))
 
+                    // Se a lista final filtrada estiver vazia, avisa o usuário
                     if (evetosDisponiveis.isEmpty()){
                         println("Nenhum evento com vagas disponíveis no momento.")
                     }else {
+                        // O forEachIndexed percorre a lista e nos dá o 'index' (0, 1, 2...) para montar o menu numérico
                         evetosDisponiveis.forEachIndexed { index, evento ->
                             val ingressoVendidos = ingressos.count { it.nomeEvento == evento.nome && !it.cancelado }
                             val vagas = evento.capacidadeMax - ingressoVendidos
@@ -779,58 +791,76 @@ fun main() {
                     println("Acesso negado. Apenas usuários comuns podem acessar o feed.")
                 }
             }
+
+            // CHAIRA (DEV 3) - Meus Ingressos e Cancelamento
             14 -> run {
                 val usuario = usuarioLogado
-                if (usuario != null && usuario.tipo == TipoUsuario.COMUM){
+                // Verifica login e perfil comum
+                if(usuario != null && usuario.tipo == TipoUsuario.COMUM){
                     println("\n=== Meus Ingressos ===")
+                    // Busca na lista geral de ingressos apenas os que pertencem ao email do usuário logado
                     val meusIngresso = ingressos.filter { it.emailUsuario == usuario.email }
 
                     if (meusIngresso.isEmpty()){
                         println("Você ainda não comprou ingressos.")
                     }else{
+                        // 1. ORDENAÇÃO COMPLEXA (Regra de Negócio do Barema)
                         val ingressoOrdenados = meusIngresso.sortedWith(compareBy(
+                            // Primeiro critério: Eventos ATIVOS ficam no topo (peso 0), CANCELADOS/INATIVOS vão pro final (peso 1)
                             { ingresso ->
                                 val evento = eventos.find { it.nome == ingresso.nomeEvento }
                                 val inativoOuCancelado = ingresso.cancelado || (evento?.ativo != true)
                                 if (inativoOuCancelado) 1 else 0
                             },
-
+                            // Segundo critério: Ordenação por data (formato yyyymmdd). Se não achar a data, joga pro fim ("99999999")
                             { ingresso ->
                                 val evento = eventos.find { it.nome == ingresso.nomeEvento }
                                 evento?.dataInicio?.split("/")?.let { partes -> "${partes.getOrNull(2)}${partes.getOrNull(1)}${partes.getOrNull(0)}" } ?: "99999999"
                             },
+                            // Terceiro critério: Ordem alfabética do nome do evento
                             { it.nomeEvento }
                         ))
 
+                        // Imprime os ingressos já ordenados corretamente
                         ingressoOrdenados.forEachIndexed { index, ingresso ->
                             val evento = eventos.find { it.nome == ingresso.nomeEvento }
+                            // Define visualmente o status atual daquele ingresso
                             val status = if (ingresso.cancelado) "CANCELADO" else if (evento?.ativo == true) "ATIVO" else "FINALIZADO"
                             println("${index + 1} - [${status}] Evento: ${ingresso.nomeEvento} | Valor Pago: R$ ${ingresso.valorPago}")
                         }
 
+                        // 2. LÓGICA DE CANCELAMENTO
                         println("\nDeseja cancelar algum ingresso? (SIM / NAO)")
                         if (readln()?.uppercase() == "SIM") {
                             print("Digite o número do ingresso que deseja cancelar: ")
                             val escolha = readln()?.toIntOrNull()
 
+                            // Valida se o usuário digitou um número válido do menu
                             if (escolha != null && escolha in 1.. ingressoOrdenados.size){
                                 val ingressoAlvo = ingressoOrdenados[escolha - 1]
 
+                                // Bloqueia tentativa de cancelar o que já está cancelado
                                 if (ingressoAlvo.cancelado){
                                     println("Este ingresso já está cancelado.")
                                 }else{
                                     val evento = eventos.find { it.nome == ingressoAlvo.nomeEvento }
 
+                                    // 3. CÁLCULO DE ESTORNO (Regra de Negócio)
+                                    // Verifica se o evento existe e se o organizador marcou 'temEstorno = true'
                                     if (evento != null && evento.temEstorno) {
+                                        // Calcula o valor da taxa (Ex: 100 reais * 10% = 10 reais retidos)
                                         val desconto = ingressoAlvo.valorPago * (evento.taxaEstorno / 100)
+                                        // Subtrai a taxa do valor pago para saber quanto devolver ao cliente
                                         val valorEstorno = ingressoAlvo.valorPago - desconto
                                         println("Ingresso cancelado com sucesso!")
-                                        println("Valor a ser estornado: R$ $valorEstorno (Taxa retida: R$ $desconto")
+                                        println("Valor a ser estornado: R$ $valorEstorno (Taxa retida: R$ $desconto)")
                                     }else{
                                         println("Ingresso cancelado com sucesso")
-                                        println("Esse evento não possui política de estorne. Nenhum valor será devolvido.")
+                                        println("Esse evento não possui política de estorno. Nenhum valor será devolvido.")
                                     }
 
+                                    // 4. IMUTABILIDADE
+                                    // Usa o .copy() para gerar um novo ingresso com status cancelado = true, respeitando o 'val' da Data Class
                                     val ingressoCancelado = ingressoAlvo.copy(cancelado = true)
                                     ingressos.remove(ingressoAlvo)
                                     ingressos.add(ingressoCancelado)
