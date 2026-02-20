@@ -339,7 +339,6 @@ fun main() {
             }
             //DEIVID
             3 -> {}
-
             //LEONARDO
             4 -> {}
             //LEONARDO
@@ -402,11 +401,119 @@ fun main() {
             }
             6 -> {}//LEONARDO
             7 -> {}//LEONARDO
-            8 -> {}//DYLAN
+            8 -> {
+                if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
+                    println("\n=== Cadastrar Novo Evento ===")
+                    print("Nome do evento: ")
+                    val nome = readlnOrNull() ?: ""
+
+                    print("Descrição: ")
+                    val descricao = readlnOrNull() ?: ""
+
+                    print("Página/URL: ")
+                    val pagina = readlnOrNull() ?: ""
+
+                    print("Data de Início (dd/mm/yyyy): ")
+                    val dataInicio = readlnOrNull() ?: ""
+
+                    print("Data de Fim (dd/mm/yyyy): ")
+                    val dataFim = readlnOrNull() ?: ""
+
+                    println("Tipo do Evento (SHOW, PALESTRA, CURSO, SOCIAL, CORPORATIVO, RELIGIOSO, ESPORTIVO, AULA, TREINAMENTO, SEMINARIO): ")
+                    val tipoInput = readlnOrNull()?.uppercase() ?: ""
+                    val tipo = try { TipoEventos.valueOf(tipoInput) } catch (e: Exception) { TipoEventos.SHOW }
+
+                    println("Modalidade (PRESENCIAL, REMOTO, HIBRIDO): ")
+                    val modalidadeInput = readlnOrNull()?.uppercase() ?: ""
+                    val modalidade = try { Modalidade.valueOf(modalidadeInput) } catch (e: Exception) { Modalidade.PRESENCIAL }
+
+                    print("Capacidade Máxima: ")
+                    val capacidadeMax = readlnOrNull()?.toIntOrNull() ?: 0
+
+                    print("Local: ")
+                    val local = readlnOrNull() ?: ""
+
+                    print("Preço do Ingresso (R$): ")
+                    val preco = readlnOrNull()?.toDoubleOrNull() ?: 0.0
+
+                    print("Permite Estorno? (SIM/NAO): ")
+                    val temEstorno = readlnOrNull()?.uppercase() == "SIM"
+
+                    var taxaEstorno = 0.0
+                    if (temEstorno) {
+                        print("Taxa de Estorno (%): ")
+                        taxaEstorno = readlnOrNull()?.toDoubleOrNull() ?: 0.0
+                    }
+
+                    val novoEvento = Evento(
+                        nome = nome, descricao = descricao, pagina = pagina, dataInicio = dataInicio,
+                        dataFim = dataFim, tipo = tipo, ligadoPrincipal = null, modalidade = modalidade,
+                        capacidadeMax = capacidadeMax, local = local, ativo = true, preco = preco,
+                        temEstorno = temEstorno, taxaEstorno = taxaEstorno, emailOrganizador = usuarioLogado.email
+                    )
+
+                    eventos.add(novoEvento)
+                    println("✅ Evento '$nome' cadastrado com sucesso!")
+                } else {
+                    println("❌ Acesso negado. Apenas organizadores podem cadastrar eventos.")
+                }
+            }  //Dylan
             9 -> {}//CHAIRA
             10 -> {}//DEIVID
             11 -> {break}//DEIVID
-            12 -> {}//DYLAN
+            12 -> {
+                if (usuarioLogado != null && usuarioLogado.tipo == TipoUsuario.ORGANIZADOR) {
+                    println("\n=== Meus Eventos ===")
+                    val meusEventos = eventos.filter { it.emailOrganizador == usuarioLogado.email }
+
+                    if (meusEventos.isEmpty()) {
+                        println("Você ainda não possui eventos cadastrados.")
+                    } else {
+                        meusEventos.forEachIndexed { index, evento ->
+                            val status = if (evento.ativo) "ATIVO" else "INATIVO"
+                            println("${index + 1}. [${status}] ${evento.nome} - ${evento.dataInicio} (R$ ${evento.preco})")
+                        }
+
+                        println("\nOpções:")
+                        println("1 - Alterar um Evento")
+                        println("2 - Ativar/Desativar um Evento")
+                        println("3 - Voltar")
+                        print("Escolha: ")
+
+                        when (readLine()?.toIntOrNull()) {
+                            1 -> {
+                                print("Digite o número do evento que deseja alterar: ")
+                                val idx = (readLine()?.toIntOrNull() ?: 0) - 1
+                                if (idx in meusEventos.indices) {
+                                    val eventoAlvo = meusEventos[idx]
+                                    print("Novo nome (ou enter para manter '${eventoAlvo.nome}'): ")
+                                    val novoNome = readLine()
+                                    val nomeFinal = if (novoNome.isNullOrBlank()) eventoAlvo.nome else novoNome
+
+                                    // Atualizando o evento
+                                    val eventoAtualizado = eventoAlvo.copy(nome = nomeFinal)
+                                    eventos[eventos.indexOf(eventoAlvo)] = eventoAtualizado
+                                    println("✅ Evento atualizado com sucesso!")
+                                } else {
+                                    println("Evento inválido.")
+                                }
+                            }
+                            2 -> {
+                                print("Digite o número do evento que deseja ativar/desativar: ")
+                                val idx = (readLine()?.toIntOrNull() ?: 0) - 1
+                                if (idx in meusEventos.indices) {
+                                    val eventoAlvo = meusEventos[idx]
+                                    val eventoAtualizado = eventoAlvo.copy(ativo = !eventoAlvo.ativo)
+                                    eventos[eventos.indexOf(eventoAlvo)] = eventoAtualizado
+                                    println("✅ Status do evento alterado para: ${if (eventoAtualizado.ativo) "ATIVO" else "INATIVO"}")
+                                }
+                            }
+                            3 -> {} // Volta ao menu principal
+                            else -> println("Opção inválida.")
+                        }
+                    }
+                }
+            }
             13 -> {}//CHAIRA
             14 -> {}//CHAIRA
         }
