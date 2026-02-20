@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="jetbrains.kotlinx.datetime.jvm" type="repository">
+    <properties maven-id="org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.6.0" />
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/kotlinx-datetime-jvm-0.6.0.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/kotlin-stdlib-1.9.21.jar!/" />
+      <root url="jar://$PROJECT_DIR$/lib/annotations-13.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

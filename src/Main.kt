@@ -4,71 +4,90 @@ enum class TipoUsuario{COMUM, ORGANIZADOR}
 enum class TipoEventos{SHOW, PALESTRA, CURSO, SOCIAL,CORPORATIVO,RELIGIOSO,ESPORTIVO, AULA, TREINAMENTO, SEMINARIO}
 enum class Sexo{MASCULINO, FEMININO, OUTRO}
 
-data class Usuario(val nome:String,
-                   val data:String,
-                   val sexo:Sexo,
-                   val email:String,
-                   val senha:String,
-                   val tipo:TipoUsuario,
-                   val ativo:Boolean = true,
-                   val cnpj:String?=null,
-                   val razaoSocial:String?=null,
-                   val nomeFantasia:String?=null)
+data class Usuario(
+    val nome:String,
+    val data:String,
+    val sexo:Sexo,
+    val email:String,
+    val senha:String,
+    val tipo:TipoUsuario,
+    val ativo:Boolean = true,
+    val cnpj:String?=null,
+    val razaoSocial:String?=null,
+    val nomeFantasia:String?=null
+)
 
-data class Evento(val nome:String,
-                  val descricao:String,
-                  val pagina:String,
+data class Evento(
+    val nome:String,
+    val descricao:String,
+    val pagina:String,
+    val dataInicio:String,
+    val dataFim:String,
+    val tipo:TipoEventos,
+    val ligadoPrincipal:String?,
+    val modalidade:Modalidade,
+    val capacidadeMax:Int,
+    val local:String,
+    val ativo:Boolean = false,
+    val preco:Double,
+    val temEstorno:Boolean,
+    val taxaEstorno:Double,
+    var emailOrganizador:String
+)
 
-                  val dataInicio:String,
-                  val dataFim:String,
-
-                  val tipo:TipoEventos,
-                  val ligadoPrincipal:String?,
-
-
-                  val modalidade:Modalidade,
-
-                  val capacidadeMax:Int,
-                  val local:String,
-
-                  val ativo:Boolean = false,
-
-                  val preco:Double,
-                  val temEstorno:Boolean,
-                  val taxaEstorno:Double,
-
-
-                  var emailOrganizador:String)
-
-data class Ingresso(val emailUsuario: String,
-                    val nomeEvento:String,
-                    val valorPago:Double,
-                    val cancelado:Boolean)
+data class Ingresso(
+    val emailUsuario: String,
+    val nomeEvento:String,
+    val valorPago:Double,
+    val cancelado:Boolean = false
+)
 
 fun main() {
     val usuarios = mutableListOf<Usuario>()
     val eventos = mutableListOf<Evento>()
     val ingressos = mutableListOf<Ingresso>()
 
+    var usuarioLogado: Usuario? = null
 
     var opcao: Int
 
     do {
         println("\n=== Dende Eventos ===")
 
-        println("1 - Cadastrar usuário")
-        println("2 - Cadastrar organizador")
-        println("3 - Login")
-        println("4 - Visualizar perfil")
-        println("5 - Alterar perfil")
-        println("6 - Inativar conta")
-        println("7 - Reativar conta")
-        println("8 - Cadastrar evento")
-        println("9 - Comprar ingresso")
-        println("10 - Logout")
-        println("11 - Sair")
+        when (usuarioLogado){
+            null -> {
+                println("1 - Cadastrar Usuário")
+                println("2 - Cadastrar Organizador")
+                println("3 - Fazer Login")
+                println("7 - Reativar Conta")
+                println("11 - Sair")
+            }
+            else -> {
+                println("Olá ${usuarioLogado.nome}! (Perfil: ${usuarioLogado.tipo}")
+                println("4 - Ver Perfil ")
+                println("5 - Alteral Perfil")
+                println("6 - Inativar Conta")
 
-        opcao = readLine()!!.toInt()
+                when (usuarioLogado.tipo) {
+                    TipoUsuario.ORGANIZADOR -> {
+                        println("8 - Cadastrar Eventos")
+                        println("12 - Meus Eventos")
+                    }
+                    TipoUsuario.COMUM -> {
+                        println("9 - Comprar Ingresso")
+                        println("13 - Feed de Eventos")
+                        println("14 - Meus Ingresso")
+                    }
+                }
+
+                println("10 - Logout")
+                println("11 - Sair")
+            }
+        }
+
+        println("\nEscolha uma opção: ")
+
+        opcao = readLine()?.toIntOrNull() ?: 0
 
         when (opcao) {
             1 -> {
