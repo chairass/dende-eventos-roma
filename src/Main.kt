@@ -7,7 +7,7 @@ enum class Sexo{MASCULINO, FEMININO, OUTRO}
 
 data class Usuario(
     val nome:String,
-    val data:String,
+    val data:LocalDate,
     val sexo:Sexo,
     val email:String,
     val senha:String,
@@ -99,46 +99,28 @@ fun main() {
                 val nome = readLine()!!
 
 
-                println("Data de Nascimento (dd/mm/yyyy):")
-                val dataNascimento = readLine()!!
-                var dataValida = true
+                println("Data de Nascimento (dd/mm/yyyy:)")
+                val dataInput = readLine()!!
 
-                if (dataNascimento.length != 10) {
-                    dataValida = false
+                val partes = dataInput.split("/")
+
+                if(partes.size != 3){
+                    println("Data inválida")
+                    continue
                 }
 
-                if (dataNascimento[2] != '/' || dataNascimento[5] != '/') {
-                    dataValida = false
+                val dia = partes[0].toIntOrNull()
+                val mes = partes[1].toIntOrNull()
+                val ano = partes[2].toIntOrNull()
+
+                if (dia == null || mes == null || ano == null){
+                    println("Data inválida")
+                    continue
                 }
 
-                if (dataValida) {
-                    val dia = dataNascimento.substring(0, 2).toIntOrNull()
-                    val mes = dataNascimento.substring(3, 5).toIntOrNull()
-                    val ano = dataNascimento.substring(6, 10).toIntOrNull()
-
-                    if (dia == null || mes == null || ano == null) {
-                        dataValida = false
-                    } else {
-
-                        if (mes !in 1..12) {
-                            dataValida = false
-                        }
-
-                        if (dia !in 1..31) {
-                            dataValida = false
-                        }
-
-                        if (mes == 2 && dia > 29) {
-                            dataValida = false
-                        }
-
-                        if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30) {
-                            dataValida = false
-                        }
-                    }
-                }
-
-                if (!dataValida) {
+                val dataNascimento = try {
+                    LocalDate(ano, mes, dia)
+                } catch (e: Exception) {
                     println("Data inválida")
                     continue
                 }
@@ -218,45 +200,27 @@ fun main() {
 
 
                 println("Data de Nascimento (dd/mm/yyyy:)")
-                val dataNascimento = readLine()!!
-                var dataValida = true
+                val dataInput = readLine()!!
 
-                if (dataNascimento.length != 10){
-                    dataValida = false
+                val partes = dataInput.split("/")
+
+                if(partes.size != 3){
+                    println("Data inválida")
+                    continue
                 }
 
-                if (dataNascimento[2] != '/' || dataNascimento[5] != '/'){
-                    dataValida = false
+                val dia = partes[0].toIntOrNull()
+                val mes = partes[1].toIntOrNull()
+                val ano = partes[2].toIntOrNull()
+
+                if (dia == null || mes == null || ano == null){
+                    println("Data inválida")
+                    continue
                 }
 
-                if (dataValida){
-                    val dia = dataNascimento.substring(0, 2).toIntOrNull()
-                    val mes = dataNascimento.substring(3, 5).toIntOrNull()
-                    val ano = dataNascimento.substring(6, 10).toIntOrNull()
-
-                    if (dia == null || mes == null || ano == null){
-                        dataValida = false
-                    } else {
-
-                        if (mes !in 1..12){
-                            dataValida = false
-                        }
-
-                        if (dia !in 1..31){
-                            dataValida = false
-                        }
-
-                        if (mes == 2 && dia > 29){
-                            dataValida = false
-                        }
-
-                        if ((mes == 4 || mes == 6 || mes == 9 || mes == 11) && dia > 30){
-                            dataValida = false
-                        }
-                    }
-                }
-
-                if (!dataValida){
+                val dataNascimento = try {
+                    LocalDate(ano, mes, dia)
+                } catch (e: Exception) {
                     println("Data inválida")
                     continue
                 }
@@ -385,15 +349,7 @@ fun main() {
                         println("Sexo: ${usuario.sexo}")
                         println("Tipo da Conta: ${usuario.tipo}")
 
-                        //Fatia a data, pegando a string "dd/mm/yyyy" e quebra em três pedaços usando "/" como separador
-                        val partes = usuario.data.split("/")
-                        //getOrNull e toIntOrNull evita q o programa quebre se a data estiver mal formatada
-                        val diaNasc = partes.getOrNull(0)?.toIntOrNull() ?: 1
-                        val mesNasc = partes.getOrNull(1)?.toIntOrNull() ?: 1
-                        val anoNasc = partes.getOrNull(2)?.toIntOrNull() ?: 2000
-
-                        //Cria um objeto de data real a partir dos números acima
-                        val dataNascimento = LocalDate(anoNasc, mesNasc, diaNasc)
+                        val dataNascimento = usuario.data
 
                         //Pega a data de "hoje" lendo o relogio do sistema local
                         val hoje = Clock.System.todayIn(TimeZone.currentSystemDefault())
@@ -429,7 +385,7 @@ fun main() {
                     else -> {
                         println("\n=== Alterar dados ===")
 
-                        //Criar avriaveis temporárias que recebem os dados atuais
+                        //Criar variáveis temporárias que recebem os dados atuais
                         var novoNome = usuario.nome
                         var novoSexo = usuario.sexo
                         var novaSenha = usuario.senha
