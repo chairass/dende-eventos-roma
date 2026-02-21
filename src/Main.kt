@@ -317,7 +317,7 @@ fun main() {
                     "SIM" -> {
                         println("CNPJ:")
                         cnpj = readLine()!!
-                        println("Razao Social")
+                        println("Razao Social:")
                         razaoSocial = readLine()!!
                         println("Nome fantasia:")
                         nomeFantasia = readLine()!!
