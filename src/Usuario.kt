@@ -6,14 +6,248 @@ import kotlinx.datetime.todayIn
 
 fun cadastrarUsuarioComum(){
 
+    println("=== Preencha as informações do usuário ===")
+
+    //Le o nome utilizando o componente de validaçao de String
+    val nome = readString("Nome", "Nome inválido", 1)
+
+    //Solicita a data de nascimento no formato dd/mm/yyyy
+    val dataInput = readString("Data de Nascimento (dd/mm/yyyy):", "Data inválida", 10)
+
+    //Converte a string digitada para LocalDate
+    val dataNascimento = try {
+
+        //Divide a data em dia, mes e ano
+        val (d, m, a) = dataInput.split("/").map { it.toInt() }
+
+        //Cria um objeto LocalDate com os valores convertidos
+        LocalDate(a, m, d)
+
+    } catch (e: Exception) {
+        //Se a conversao falhar, informa erro e cancela cadastro
+        println("Data inválida")
+        return
+    }
+
+    //Le o sexo digitado pelo usuario e converte para letras maiusculas
+    val sexoInput = readString("Sexo (MASCULINO, FEMININO, OUTRO):",
+        "Sexo inválido",
+        1).uppercase()
+
+    //Tenta converter o texto para o enum Sexo
+    val sexo = try {
+        Sexo.valueOf(sexoInput)
+    } catch (e: Exception) {
+        println("Sexo inválido!")
+        return
+    }
+
+
+    //Solicita email
+    val email = readString("Email:", "Email inválido", 4)
+
+    //Variavel criada para controlar a validacao do email
+    var emailValido = true
+
+    //Primeira validacao do email
+    when {
+        email.contains(" ") -> emailValido = false
+        email.count { it == '@' } != 1 -> emailValido = false
+        email.startsWith("@") || email.endsWith("@") -> emailValido = false
+    }
+
+    //Segunda validacao
+    if (emailValido) {
+
+        val posicaoArroba = email.indexOf('@')
+
+        val parteDepoisDoArroba = email.substring(posicaoArroba + 1)
+
+        when {
+            !parteDepoisDoArroba.contains('.') -> emailValido = false
+            email.endsWith(".") -> emailValido = false
+        }
+    }
+
+    //Caso nao seja valido, cancela o cadastro
+    if (!emailValido) {
+        println("Email inválido")
+        return
+    }
+
+    //Pede senha do usuario
+    val senha = readString("Senha:", "Senha inválida", 4)
+
+
+    //Verifica se já existe usuario com o mesmo email
+    if(Repositorio.buscarUsuarioEmail(email) != null) {
+        println("Email já utilizado, tente outro!")
+        return
+    }
+
+
+    // Cria o objeto Usuario com os dados informados
+    val usuario = Usuario(
+        nome = nome,
+        data = dataNascimento,
+        sexo = sexo,
+        email = email,
+        senha = senha,
+        tipo = TipoUsuario.COMUM,
+        ativo = true,
+        cnpj = null,
+        razaoSocial = null,
+        nomeFantasia = null
+    )
+
+    //Adiciona usuario ao repositorio
+    Repositorio.adicionarUsuario(usuario)
+    println("Usuário cadastrado com sucesso!")
 }
 
 fun cadastrarOrganizador(){
+
+    println("=== Preencha as informações do organizador ===")
+
+    val nome = readString("Nome", "Nome inválido", 1)
+
+    val dataInput = readString("Data de Nascimento (dd/mm/yyyy):", "Data inválida", 10)
+
+    // Converte a data digitada para LocalDate
+    val dataNascimento = try {
+        val (d, m, a) = dataInput.split("/").map { it.toInt() }
+        LocalDate(a, m, d)
+    } catch (e: Exception) {
+        println("Data inválida")
+        return
+    }
+
+    // Lê o sexo do organizador
+    val sexoInput = readString("Sexo (MASCULINO, FEMININO, OUTRO):",
+        "Sexo inválido",
+        1).uppercase()
+
+    // Converte o texto para enum Sexo
+    val sexo = try {
+        Sexo.valueOf(sexoInput)
+    } catch (e: Exception) {
+        println("Sexo inválido!")
+        return
+    }
+
+
+    // Lê o email
+    val email = readString("Email:", "Email inválido", 4)
+
+    //Controla validacao de email
+    var emailValido = true
+
+    //Primeira validacao
+    when {
+        email.contains(" ") -> emailValido = false
+        email.count { it == '@' } != 1 -> emailValido = false
+        email.startsWith("@") || email.endsWith("@") -> emailValido = false
+    }
+
+    //Segunda validacao
+    if (emailValido) {
+
+        val posicaoArroba = email.indexOf('@')
+
+        val parteDepoisDoArroba = email.substring(posicaoArroba + 1)
+
+        when {
+            !parteDepoisDoArroba.contains('.') -> emailValido = false
+            email.endsWith(".") -> emailValido = false
+        }
+    }
+
+    if (!emailValido) {
+        println("Email inválido")
+        return
+    }
+
+    //Pede a senha ao usuario
+    val senha = readString("Senha:", "Senha inválida", 4)
+
+    //Pergunta se o organizador é uma empresa
+    val empresa = readString("Você é uma empresa? Digite com SIM ou NAO", "Resposta inválida", 3)
+
+    //Dados da empresa começam nulo
+    var cnpj: String? = null
+    var razaoSocial: String? = null
+    var nomeFantasia: String? = null
+
+    //Quando for empresa, solicita os dados empresariais
+    when(empresa.uppercase()) {
+        "SIM" -> {
+            cnpj = readString("CNPJ:", "CNPJ inválido", 14)
+            razaoSocial = readString("Razão Social:", "Razão social inválida", 5)
+            nomeFantasia = readString("Nome fantasia:", "Nome inválido", 5)
+        }
+        "NAO" -> {}
+        else -> {
+            println("Resposta inválida")
+            return
+        }
+    }
+
+
+    //Verifica se email já existe
+    if(Repositorio.buscarUsuarioEmail(email) != null) {
+        println("Email já utilizado, tente outro!")
+        return
+    }
+
+
+    //Cria objeto do tipo organizador
+    val usuario = Usuario(
+        nome = nome,
+        data = dataNascimento,
+        sexo = sexo,
+        email = email,
+        senha = senha,
+        tipo = TipoUsuario.ORGANIZADOR,
+        ativo = true,
+        cnpj = cnpj,
+        razaoSocial = razaoSocial,
+        nomeFantasia = nomeFantasia
+    )
+
+    //Adiciona ao repositorio
+    Repositorio.adicionarUsuario(usuario)
+    println("Usuário cadastrado com sucesso!")
 
 }
 
 fun fazerLogin(){
 
+    //Verifica se já existe um usuario logado
+    if (usuarioLogado != null){
+        println("Já existe um usuário logado.")
+        return
+    }
+
+    //solicita as credenciais
+    val email = readString("Email:", "Email inválido", 4)
+    val senha = readString("Senha:", "Senha inválida", 4)
+
+    //Busca usuario usando email e senha
+    val usuario = buscarUsuarioLogin(email, senha)
+
+    //Caso nao encontre o usuario
+    if (usuario == null) {
+        println("Credenciais incorretas ou conta inativa")
+    }
+    //Caso o usuario esteja inativo
+    else if (!usuario.ativo) {
+        println("Conta inativa")
+    }
+    //Login bem sucedido
+    else {
+        usuarioLogado = usuario
+        println("Login realizado com sucesso!")
+    }
 }
 
 // Recebe o usuário logado como parâmetro para evitar o uso de variáveis globais

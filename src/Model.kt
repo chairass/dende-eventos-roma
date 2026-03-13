@@ -7,7 +7,7 @@ enum class Sexo{MASCULINO, FEMININO, OUTRO}
 
 data class Usuario(
     val nome:String,
-    val data: String,
+    val data: LocalDate,
     val sexo:Sexo,
     val email:String,
     val senha:String,
