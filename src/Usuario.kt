@@ -51,7 +51,7 @@ fun verPerfil(usuario: Usuario) {
     }
 }
 
-//Retorna um usuário para poder atualizar a sessão do utilizador logado
+//Retorna um usuário para poder atualizar a sessão do usuário logado
 fun alterarPerfil(usuario: Usuario): Usuario{
     println("\n=== Alterar dados ===")
     println("Nome atual: ${usuario.nome}")
