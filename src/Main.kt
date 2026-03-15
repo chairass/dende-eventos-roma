@@ -1,7 +1,7 @@
 import kotlinx.datetime.*
 
 fun main() {
-    var usuarioLogado: Usuario? = null
+var usuarioLogado: Usuario? = null
 
     var opcao: Int
 
@@ -46,7 +46,7 @@ fun main() {
         when (opcao) {
             1 -> cadastrarUsuarioComum()
             2 -> cadastrarOrganizador()
-            3 -> usuarioLogado
+            3 -> usuarioLogado = fazerLogin()
 
             4 -> if (usuarioLogado != null) verPerfil(usuarioLogado) else println("Você precisa estar logado.")
             5 -> if (usuarioLogado != null) usuarioLogado = alterarPerfil(usuarioLogado) else println("Você precisa estar logado.")

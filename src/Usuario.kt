@@ -80,7 +80,7 @@ fun cadastrarUsuarioComum(){
 
 
     //Verifica se já existe usuario com o mesmo email
-    if(Repositorio.buscarUsuarioEmail(email) != null) {
+    if(buscarUsuarioEmail(email) != null) {
         println("Email já utilizado, tente outro!")
         return
     }
@@ -89,7 +89,7 @@ fun cadastrarUsuarioComum(){
     // Cria o objeto Usuario com os dados informados
     val usuario = Usuario(
         nome = nome,
-        data = dataNascimento,
+        data = dataInput,
         sexo = sexo,
         email = email,
         senha = senha,
@@ -101,7 +101,7 @@ fun cadastrarUsuarioComum(){
     )
 
     //Adiciona usuario ao repositorio
-    Repositorio.adicionarUsuario(usuario)
+    adicionarUsuario(usuario)
     println("Usuário cadastrado com sucesso!")
 }
 
@@ -194,7 +194,7 @@ fun cadastrarOrganizador(){
 
 
     //Verifica se email já existe
-    if(Repositorio.buscarUsuarioEmail(email) != null) {
+    if(buscarUsuarioEmail(email) != null) {
         println("Email já utilizado, tente outro!")
         return
     }
@@ -203,7 +203,7 @@ fun cadastrarOrganizador(){
     //Cria objeto do tipo organizador
     val usuario = Usuario(
         nome = nome,
-        data = dataNascimento,
+        data = dataInput,
         sexo = sexo,
         email = email,
         senha = senha,
@@ -215,18 +215,12 @@ fun cadastrarOrganizador(){
     )
 
     //Adiciona ao repositorio
-    Repositorio.adicionarUsuario(usuario)
+    adicionarUsuario(usuario)
     println("Usuário cadastrado com sucesso!")
 
 }
 
-fun fazerLogin(){
-
-    //Verifica se já existe um usuario logado
-    if (usuarioLogado != null){
-        println("Já existe um usuário logado.")
-        return
-    }
+fun fazerLogin(): Usuario?{
 
     //solicita as credenciais
     val email = readString("Email:", "Email inválido", 4)
@@ -238,15 +232,17 @@ fun fazerLogin(){
     //Caso nao encontre o usuario
     if (usuario == null) {
         println("Credenciais incorretas ou conta inativa")
+        return null
     }
     //Caso o usuario esteja inativo
     else if (!usuario.ativo) {
         println("Conta inativa")
+        return null
     }
     //Login bem sucedido
     else {
-        usuarioLogado = usuario
         println("Login realizado com sucesso!")
+        return usuario
     }
 }
 
