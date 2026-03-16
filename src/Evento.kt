@@ -52,7 +52,7 @@ fun cadastrarEvento(usuarioLogado: Usuario) {
 
     // Chama a função do Repositorio.kt para salvar
     adicionarEvento(novoEvento)
-    println("✅ Evento '$nome' cadastrado com sucesso!")
+    println(" Evento '$nome' cadastrado com sucesso!")
 }
 
 
@@ -92,9 +92,9 @@ fun meusEventos(usuarioLogado: Usuario){
 
                 // Usa o repositório para atualizar o evento antigo
                 atualizarEventos(eventoAlvo, eventoAtualizado)
-                println("✅ Evento atualizado com sucesso!")
+                println(" Evento atualizado com sucesso!")
             } else {
-                println("❌ Evento inválido.")
+                println(" Evento inválido.")
             }
         }
         2 -> {
@@ -106,13 +106,13 @@ fun meusEventos(usuarioLogado: Usuario){
 
                 // Usa o repositório para atualizar o status do evento
                 atualizarEventos(eventoAlvo, eventoAtualizado)
-                println("✅ Status alterado para: ${if (eventoAtualizado.ativo) "ATIVO" else "INATIVO"}")
+                println(" Status alterado para: ${if (eventoAtualizado.ativo) "ATIVO" else "INATIVO"}")
             } else {
-                println("❌ Evento inválido.")
+                println(" Evento inválido.")
             }
         }
         3 -> return
-        else -> println("❌ Opção inválida.")
+        else -> println(" Opção inválida.")
     }
 }
 
