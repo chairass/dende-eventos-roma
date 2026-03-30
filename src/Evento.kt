@@ -57,20 +57,21 @@ fun cadastrarEvento(usuarioLogado: Usuario) {
 
 
 fun meusEventos(usuarioLogado: Usuario){
-    println("\n=== Meus Eventos ===")
-
-    // Puxa os eventos filtrados direto do Repositorio
     val meusEventos = listarEventosDoOrganizador(usuarioLogado.email)
 
     if (meusEventos.isEmpty()) {
-        println("Você ainda não possui eventos cadastrados.")
+        println("\nVocê ainda não possui eventos cadastrados.")
         return
     }
 
-    meusEventos.forEachIndexed { index, evento ->
+    // Transforma a lista de eventos numa lista de textos para a tabela
+    val linhasDaTabela = meusEventos.mapIndexed { index, evento ->
         val status = if (evento.ativo) "ATIVO" else "INATIVO"
-        println("${index + 1}. [$status] ${evento.nome} - ${evento.dataInicio} (R$ ${evento.preco})")
+        "${(index + 1).toString().padEnd(2)} | [$status] | ${evento.nome.padEnd(15)} | ${evento.dataInicio} | R$ ${evento.preco}"
     }
+
+    // Chama a tabela mágica!
+    printTable("MEUS EVENTOS CADASTRADOS", linhasDaTabela)
 
     println("\nOpções:")
     println("1 - Alterar um Evento")

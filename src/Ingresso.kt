@@ -52,82 +52,83 @@ fun comprarIngresso(usuarioLogado: Usuario){
         println("Opção inválida.")
     }
 }
-fun feedEventos(usuarioLogado: Usuario){
-    println("\n=== Feed de Eventos ===")
 
+fun feedEventos(usuarioLogado: Usuario){
     // Puxa apenas os eventos que estão com ativo = true
     val eventosAtivos = listarEventosAtivos()
 
     if (eventosAtivos.isEmpty()) {
-        println("Nenhum evento ativo no momento. Volte mais tarde!")
+        println("\nNenhum evento ativo no momento. Volte mais tarde!")
         return
     }
 
-    println("Eventos disponíveis para você:")
-    eventosAtivos.forEach { evento ->
-        // Calcula as vagas em tempo real
+    // Cria uma lista de textos formatados com os dados do evento
+    val linhasDaTabela = eventosAtivos.map { evento ->
         val ingressosVendidos = contarIngressosVendidos(evento.nome)
         val vagas = evento.capacidadeMax - ingressosVendidos
 
-        println(" ${evento.nome} | Data: ${evento.dataInicio} | Preço: R$ ${evento.preco} | Vagas: $vagas")
-        println("   └ Local: ${evento.local} (${evento.modalidade})")
+        // O padEnd(15) garante que as colunas fiquem alinhadas mesmo com nomes de tamanhos diferentes
+        "${evento.nome.padEnd(15)} | Data: ${evento.dataInicio} | Preço: R$ ${evento.preco} | Vagas: $vagas | Local: ${evento.local} (${evento.modalidade})"
     }
+
+    // Chama a SUA função de UI para imprimir a tabela!
+    printTable("FEED DE EVENTOS DISPONÍVEIS", linhasDaTabela)
 }
 
 fun meusIngressos(usuarioLogado: Usuario){
-    println("\n=== Meus Ingressos ===")
-
     // Puxa o histórico de compras do usuário
     val meusIngressos = listarIngressosDoUsuario(usuarioLogado.email)
 
     if (meusIngressos.isEmpty()) {
-        println("Você ainda não comprou nenhum ingresso.")
+        println("\nVocê ainda não comprou nenhum ingresso.")
         return
     }
 
-    meusIngressos.forEachIndexed { index, ingresso ->
+    val linhasDaTabela = meusIngressos.mapIndexed { index, ingresso ->
         val status = if (ingresso.cancelado) "CANCELADO" else "ATIVO"
-        println("${index + 1}. [$status] Evento: ${ingresso.nomeEvento} | Valor Pago: R$ ${ingresso.valorPago}")
+        "${(index + 1).toString().padEnd(2)} | [$status] | Evento: ${ingresso.nomeEvento.padEnd(15)} | Valor Pago: R$ ${ingresso.valorPago}"
     }
 
-    // Submenu para Cancelamento, aparece quando houver  ingresso ativo
-    val ingressosAtivos = meusIngressos.filter { !it.cancelado }
-    if (ingressosAtivos.isNotEmpty()) {
-        println("\nDeseja cancelar algum ingresso?")
-        print("Digite o número do ingresso (ou 0 para voltar): ")
+    printTable("MEU HISTÓRICO DE INGRESSOS", linhasDaTabela)
 
-        val escolha = readlnOrNull()?.toIntOrNull() ?: 0
+        // Submenu para Cancelamento, aparece quando houver  ingresso ativo
+        val ingressosAtivos = meusIngressos.filter { !it.cancelado }
+        if (ingressosAtivos.isNotEmpty()) {
+            println("\nDeseja cancelar algum ingresso?")
+            print("Digite o número do ingresso (ou 0 para voltar): ")
 
-        if (escolha in 1..meusIngressos.size) {
-            val ingressoAlvo = meusIngressos[escolha - 1]
+            val escolha = readlnOrNull()?.toIntOrNull() ?: 0
 
-            if (ingressoAlvo.cancelado) {
-                println(" Este ingresso já se encontra cancelado.")
-            } else {
-                // Busca o evento original para ver a política de estorno
-                val evento = eventos.find { it.nome == ingressoAlvo.nomeEvento }
+            if (escolha in 1..meusIngressos.size) {
+                val ingressoAlvo = meusIngressos[escolha - 1]
 
-                if (evento != null && evento.temEstorno) {
-                    val valorReembolso = ingressoAlvo.valorPago * (1.0 - (evento.taxaEstorno / 100.0))
-                    println("Este evento possui taxa de estorno de ${evento.taxaEstorno}%.")
-                    println("Valor a ser reembolsado: R$ $valorReembolso")
+                if (ingressoAlvo.cancelado) {
+                    println(" Este ingresso já se encontra cancelado.")
                 } else {
-                    println("️Este evento NÃO permite estorno. O cancelamento não gerará devolução do valor.")
-                }
+                    // Busca o evento original para ver a política de estorno
+                    val evento = eventos.find { it.nome == ingressoAlvo.nomeEvento }
 
-                println("Tem certeza que deseja cancelar? (SIM/NAO)")
-                val confirmacao = readlnOrNull()?.uppercase()
+                    if (evento != null && evento.temEstorno) {
+                        val valorReembolso = ingressoAlvo.valorPago * (1.0 - (evento.taxaEstorno / 100.0))
+                        println("Este evento possui taxa de estorno de ${evento.taxaEstorno}%.")
+                        println("Valor a ser reembolsado: R$ $valorReembolso")
+                    } else {
+                        println("️Este evento NÃO permite estorno. O cancelamento não gerará devolução do valor.")
+                    }
 
-                if (confirmacao == "SIM") {
-                    val ingressoCancelado = ingressoAlvo.copy(cancelado = true)
-                    atualizarIngresso(ingressoAlvo, ingressoCancelado)
-                    println(" Ingresso cancelado com sucesso!")
-                } else {
-                    println("Operação abortada.")
+                    println("Tem certeza que deseja cancelar? (SIM/NAO)")
+                    val confirmacao = readlnOrNull()?.uppercase()
+
+                    if (confirmacao == "SIM") {
+                        val ingressoCancelado = ingressoAlvo.copy(cancelado = true)
+                        atualizarIngresso(ingressoAlvo, ingressoCancelado)
+                        println(" Ingresso cancelado com sucesso!")
+                    } else {
+                        println("Operação abortada.")
+                    }
                 }
+            } else if (escolha != 0) {
+                println(" Opção inválida.")
             }
-        } else if (escolha != 0) {
-            println(" Opção inválida.")
         }
     }
-}
